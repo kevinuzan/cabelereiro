@@ -1,0 +1,35 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+:root {
+    --primary: #f38f18; /* Laranja Barber */
+    --bg: #000000;
+    --card: #121212;
+    --input: #1a1a1a;
+    --border: #282828;
+    --text: #ffffff;
+    --text-dim: #a0a0a0;
+}
+
+body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+.hidden {
+    display: none !important;
+}
+
+hr {
+    border: 0;
+    border-top: 1px solid var(--border);
+    margin: 30px 0;
+}

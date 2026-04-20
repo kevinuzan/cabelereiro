@@ -15,8 +15,11 @@ const DB_NAME = "barbearia_db";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 app.use(cors());
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// Primeiro, servimos os arquivos da pasta 'dist' que o 'npm run build' vai gerar
+app.use(express.static(path.join(__dirname, 'dist')));
 
 async function startServer() {
     const client = new MongoClient(process.env.MONGO_PUBLIC_URL || "mongodb://localhost:27017");
@@ -33,13 +36,26 @@ async function startServer() {
         });
 
         app.post('/api/admin/config', async (req, res) => {
-            const { tempoCorte, profissionais } = req.body;
-            await configColl.updateOne(
-                { tipo: "geral" },
-                { $set: { tempoCorte, profissionais } },
-                { upsert: true }
-            );
-            res.json({ success: true });
+            // Agora desestruturamos também os 'servicos' que vêm do app.js
+            const { tempoCorte, profissionais, servicos } = req.body;
+
+            try {
+                await configColl.updateOne(
+                    { tipo: "geral" },
+                    {
+                        $set: {
+                            tempoCorte,
+                            profissionais, // Lista de objetos {id, nome, foto}
+                            servicos       // Lista de objetos {id, nome, duracao, foto}
+                        }
+                    },
+                    { upsert: true } // Se não existir o documento 'geral', ele cria um novo
+                );
+                res.json({ success: true, message: "Configurações atualizadas!" });
+            } catch (err) {
+                console.error("Erro ao salvar no MongoDB:", err);
+                res.status(500).json({ error: "Erro ao salvar no banco" });
+            }
         });
 
         // --- API CLIENTE ---
@@ -51,10 +67,16 @@ async function startServer() {
         app.post('/api/agendamentos', async (req, res) => {
             const novoAgendamento = { ...req.body, dataCriacao: new Date() };
             const result = await agendamentosColl.insertOne(novoAgendamento);
-            
-            // Notifica o admin via Socket.io em tempo real
+
             io.emit('novo_agendamento', { ...novoAgendamento, _id: result.insertedId });
             res.json({ success: true });
+        });
+
+        // --- AJUSTE PARA PWA / SINGLE PAGE APP ---
+        // Se o usuário tentar acessar qualquer rota que não seja da API (ex: /admin),
+        // o servidor entrega o index.html da pasta 'dist'.
+        app.get('*', (req, res) => {
+            res.sendFile(path.join(__dirname, 'dist', 'index.html'));
         });
 
         httpServer.listen(PORT, () => console.log(`Servidor ON: http://localhost:${PORT}`));
