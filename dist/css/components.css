@@ -1,0 +1,170 @@
+.card {
+    background-color: var(--card);
+    border-radius: 24px;
+    padding: 24px;
+    border: 1px solid var(--border);
+}
+
+.section-title {
+    font-size: 18px;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    color: var(--text-dim);
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+input, select {
+    width: 100%;
+    background-color: var(--input);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 15px;
+    outline: none;
+}
+
+input:focus, select:focus {
+    border-color: var(--primary);
+}
+
+/* BOTÕES PRINCIPAIS (+ ADICIONAR / AGENDAR / SALVAR) */
+.btn-primary, .btn-add {
+    width: 100%;
+    background: var(--primary);
+    color: #000;
+    border: none;
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(243, 143, 24, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.btn-primary:hover, .btn-add:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(243, 143, 24, 0.4);
+    filter: brightness(1.1);
+}
+
+/* BOTÕES DE AÇÃO NOS CARDS (EDITAR / EXCLUIR) */
+.btn-edit {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    margin-right: 8px;
+}
+
+.btn-edit:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: rgba(243, 143, 24, 0.05);
+}
+
+.btn-remove {
+    background: #ff4444;
+    border: none;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: opacity 0.2s;
+}
+
+.btn-remove:hover {
+    opacity: 0.8;
+}
+
+/* CARDS DE LISTAGEM NO ADMIN */
+.prof-admin-card {
+    display: flex;
+    align-items: center;
+    background: var(--input);
+    padding: 12px 16px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    border: 1px solid var(--border);
+    gap: 15px;
+}
+
+.prof-admin-card img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--primary);
+}
+
+.prof-admin-card .actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+}
+
+/* CHIPS DE SERVIÇOS */
+.checkbox-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px 0;
+}
+
+.checkbox-grid input[type="checkbox"] {
+    display: none;
+}
+
+.service-chip {
+    padding: 8px 16px;
+    background: var(--input);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    color: var(--text-dim);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.checkbox-grid input[type="checkbox"]:checked + .service-chip {
+    background: var(--primary);
+    color: #000;
+    border-color: var(--primary);
+    font-weight: 600;
+}
+
+.preview-img {
+    margin-top: 10px;
+    text-align: center;
+}
+
+.preview-img img {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--primary);
+}

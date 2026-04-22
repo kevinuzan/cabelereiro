@@ -1,0 +1,75 @@
+.app-container {
+    width: 100%;
+    max-width: 1000px;
+    min-height: 100vh;
+    padding: 24px;
+    margin: 0 auto;
+    box-sizing: border-box;
+    transition: max-width 0.3s ease;
+}
+
+.header {
+    text-align: center;
+    padding: 20px 0 30px;
+}
+
+.header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.header h1 span {
+    color: var(--primary);
+}
+
+/* Sistema de Abas Principal */
+.nav-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+.nav-tabs button {
+    flex: 1;
+    background: var(--input);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.nav-tabs button.active {
+    background: var(--primary);
+    color: #000;
+    border-color: var(--primary);
+}
+
+/* Sub-navegação interna do Admin */
+.sub-nav {
+    background: var(--input);
+    padding: 5px;
+    border-radius: 14px;
+}
+
+/* Layout Flex para Desktop */
+@media (min-width: 769px) {
+    .admin-flex-layout {
+        display: grid;
+        grid-template-columns: 1fr 1.2fr;
+        gap: 40px;
+        align-items: start;
+    }
+}
+
+@media (max-width: 768px) {
+    .app-container {
+        max-width: 480px;
+    }
+    .admin-flex-layout {
+        display: block;
+    }
+}
