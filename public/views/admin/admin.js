@@ -12,7 +12,7 @@ import { parseList } from '../../utils/string.js';
 async function loadSettings() {
     const _config = await config.get();
     document.getElementById('cut-duration').value = _config.tempoCorte;
-    document.getElementById('professionals-list').value = (config.profissionais ?? []).join(', ');
+    document.getElementById('professionals-list').value = (_config.profissionais ?? []).join(', ');
 }
 
 async function loadAppointments() {
