@@ -1,0 +1,55 @@
+:root {
+        /* BASE */
+        --color-black: #111111;
+        --color-gray-900: #1a1a1a;
+        --color-gray-700: #444444;
+        --color-gray-400: #999999;
+        --color-gray-200: #e5e5e5;
+        --color-gray-100: #f4f4f4;
+        --color-white: #ffffff;
+
+        --color-accent: #c8a96e;
+        --color-accent-dark: #a8893e;
+        --color-danger: #d94f4f;
+        --color-success: #4caf7d;
+
+        /* SEMANTIC */
+        --bg-page: var(--color-gray-100);
+        --bg-card: var(--color-white);
+        --bg-btn-primary: var(--color-black);
+        --bg-btn-accent: var(--color-accent);
+
+        --text-primary: var(--color-gray-900);
+        --text-secondary: var(--color-gray-700);
+        --text-muted: var(--color-gray-400);
+        --text-on-dark: var(--color-white);
+        --text-on-accent: var(--color-black);
+
+        --border-default: var(--color-gray-200);
+        --border-focus: var(--color-accent);
+
+        /* SPACE */
+        --space-xs: 4px;
+        --space-sm: 8px;
+        --space-md: 16px;
+        --space-lg: 24px;
+        --space-xl: 40px;
+
+        /* TYPOGRAPHY */
+        --font-base: 'Segoe UI', system-ui, sans-serif;
+        --font-size-sm: 13px;
+        --font-size-base: 15px;
+        --font-size-lg: 18px;
+        --font-size-xl: 22px;
+
+        /* BORDERS/SHADOWS */
+        --radius-sm: 4px;
+        --radius-md: 8px;
+        --radius-lg: 12px;
+        --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.08);
+        --shadow-btn: 0 2px 4px rgba(0, 0, 0, 0.2);
+
+        /* TRANSICTIONS */
+        --transition-fast: 150ms ease;
+        --transition-base: 250ms ease;
+}

@@ -1,68 +1,66 @@
-const socket = io();
+import { createButton } from '../src/components/button.js';
+import { init as initCliente } from '../views/cliente/cliente.js';
+import { init as initAdmin } from '../views/admin/admin.js';
 
-// Alternar entre visões
-function toggleView(view) {
-    document.getElementById('view-cliente').classList.toggle('hidden', view !== 'cliente');
-    document.getElementById('view-admin').classList.toggle('hidden', view !== 'admin');
-    if (view === 'admin') carregarAgendamentosAdmin();
-    carregarConfigs();
-}
+const routes = [
+    {
+        id: 'client',
+        label: 'Schedule',
+        partial: '../views/cliente/cliente.html',
+        init: initCliente,
+    },
+    {
+        id: 'admin',
+        label: 'Admin',
+        partial: '../views/admin/admin.html',
+        init: initAdmin,
+    },
+];
 
-async function carregarConfigs() {
-    const res = await fetch('/api/admin/config');
-    const config = await res.json();
-    
-    // Atualiza o select do cliente
-    const select = document.getElementById('select-barbeiro');
-    select.innerHTML = config.profissionais.map(p => `<option value="${p}">${p}</option>`).join('');
-    
-    // Preenche inputs do admin
-    document.getElementById('tempo-corte').value = config.tempoCorte;
-    document.getElementById('lista-profissionais').value = config.profissionais.join(', ');
-}
+let currentRoute = null;
 
-async function salvarConfig() {
-    const tempoCorte = document.getElementById('tempo-corte').value;
-    const profissionais = document.getElementById('lista-profissionais').value.split(',').map(s => s.trim());
+// Avaliar possibilidade de adicionar CancellationTokens ao alterar abas
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+async function navigateTo(routeId) {
+    const route = routes.find(r => r.id === routeId);
+    if (!route || route === currentRoute) return;
+    currentRoute = route;
 
-    await fetch('/api/admin/config', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tempoCorte, profissionais })
+    document.querySelectorAll('.btn--tab').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.route === routeId);
     });
-    alert("Configurações salvas!");
-    carregarConfigs();
+
+    const root = document.getElementById('app-root');
+    const label = document.createElement('p');
+    label.style.color = 'var(--text-muted)';
+    label.style.padding = 'var(--space-md)';
+    label.textContent = 'Loading...';
+    root.appendChild(label);
+
+    try {
+        const res = await fetch(route.partial);
+        const html = await res.text();
+        root.innerHTML = html;
+        await route.init();
+    } catch (err) {
+        label.style = "color:var(--color-danger)";
+        label.textContent = "Failed to load page.";
+        console.error('Failed to load partial:', err);
+    }
 }
 
-async function fazerAgendamento() {
-    const dados = {
-        cliente: document.getElementById('nome-cliente').value,
-        profissional: document.getElementById('select-barbeiro').value,
-        data: document.getElementById('data-hora').value
-    };
-
-    await fetch('/api/agendamentos', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dados)
+function buildNav() {
+    const nav = document.getElementById('tab-nav');
+    routes.forEach(route => {
+        const btn = createButton({
+            label: route.label,
+            variant: 'tab',
+            onClick: () => navigateTo(route.id),
+        });
+        btn.dataset.route = route.id;
+        nav.appendChild(btn);
     });
-    alert("Agendado com sucesso!");
 }
 
-async function carregarAgendamentosAdmin() {
-    const res = await fetch('/api/agendamentos');
-    const agendamentos = await res.json();
-    const lista = document.getElementById('lista-admin');
-    lista.innerHTML = agendamentos.map(a => `
-        <li><strong>${a.data}</strong>: ${a.cliente} com ${a.profissional}</li>
-    `).join('');
-}
-
-// Escuta em tempo real se houver novo agendamento enquanto o admin está aberto
-socket.on('novo_agendamento', (data) => {
-    alert(`Novo agendamento: ${data.cliente}!`);
-    carregarAgendamentosAdmin();
-});
-
-// Inicialização
-carregarConfigs();
+buildNav();
+navigateTo('client');
