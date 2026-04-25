@@ -1,20 +1,106 @@
-<div class="card">
-    <h2 class="card__title">Establishment Settings</h2>
+<div>
+    <div class="card">
+        <h2 class="card__title">Admin Panel</h2>
 
-    <div class="field">
-        <label class="field__label" for="cut-duration">Average cut duration (min)</label>
-        <input class="field__input" type="number" id="cut-duration" value="30">
+        <nav class="sub-tab-nav">
+            <button class="btn btn--sub-tab active" data-subtab="services">Services</button>
+            <button class="btn btn--sub-tab" data-subtab="team">Team</button>
+            <button class="btn btn--sub-tab" data-subtab="appointments">Appointments</button>
+            <button class="btn btn--sub-tab" data-subtab="settings">Settings</button>
+        </nav>
     </div>
 
-    <div class="field">
-        <label class="field__label" for="professionals-list">Professionals (comma separated)</label>
-        <input class="field__input" type="text" id="professionals-list" placeholder="Ex: João, Maria">
+    <!-- #region SERVICES -->
+    <div class="subview card" id="subview-services">
+        <h3>Add Service</h3>
+
+        <div class="field">
+            <label class="field__label" for="service-name">Name</label>
+            <input class="field__input" type="text" id="service-name" placeholder="Ex: Haircut">
+        </div>
+
+        <div class="field">
+            <label class="field__label" for="service-duration">Duration (min)</label>
+            <input class="field__input" type="number" id="service-duration" value="30">
+        </div>
+
+        <div class="field">
+            <label class="field__label" for="service-photo">Photo</label>
+            <input class="field__input" type="file" id="service-photo" accept="image/*">
+            <div id="service-photo-preview"></div>
+        </div>
+
+        <div id="btn-add-service-container"></div>
+
+        <h3>Services</h3>
+        <div id="services-list"></div>
     </div>
+    <!-- #endregion SERVICES -->
 
-    <div id="btn-save-container"></div>
+    <!------------------------------------------------------------------------------------------>
+
+    <!-- #region TEAM -->
+    <div class="subview card hidden" id="subview-team">
+        <h3>Add Professional</h3>
+
+        <div class="field">
+            <label class="field__label" for="professional-name">Name</label>
+            <input class="field__input" type="text" id="professional-name" placeholder="Ex: João">
+        </div>
+
+        <div class="field">
+            <label class="field__label" for="professional-photo">Photo</label>
+            <input class="field__input" type="file" id="professional-photo" accept="image/*">
+            <div id="professional-photo-preview"></div>
+        </div>
+
+        <div class="field">
+            <label class="field__label">Services</label>
+            <div id="professional-services-checkboxes"></div>
+        </div>
+
+        <div id="btn-add-professional-container"></div>
+
+        <h3>Team</h3>
+        <div id="professionals-list"></div>
+    </div>
+    <!-- #endregion TEAM -->
+
+    <!------------------------------------------------------------------------------------------>
+
+    <!-- #region APPOINTMENTS -->
+    <div class="subview card hidden" id="subview-appointments">
+        <h3>Upcoming Appointments</h3>
+        <div class="appointment-list" id="appointments-list"></div>
+    </div>
+    <!-- #endregion APPOINTMENTS -->
+
+    <!------------------------------------------------------------------------------------------>
+
+    <!-- #region SETTINGS -->
+    <div class="subview card hidden" id="subview-settings">
+        <h3>Settings</h3>
+
+        <div class="field">
+            <label class="field__label" for="cut-duration">Average cut duration (min)</label>
+            <input class="field__input" type="number" id="cut-duration" value="30">
+        </div>
+
+        <div id="btn-save-container"></div>
+    </div>
+    <!-- #endregion SETTINGS -->
 </div>
 
-<div class="card">
-    <h3>Upcoming Appointments</h3>
-    <div class="appointment-list" id="appointments-list"></div>
+<!-- #region MODAL -->
+<div class="modal hidden" id="edit-modal">
+    <div class="modal__backdrop" id="modal-backdrop"></div>
+    <div class="modal__box card">
+        <h3 id="modal-title"></h3>
+        <div id="modal-fields"></div>
+        <div class="modal__actions">
+            <div id="btn-modal-confirm-container"></div>
+            <div id="btn-modal-cancel-container"></div>
+        </div>
+    </div>
 </div>
+<!-- #endregion MODAL -->

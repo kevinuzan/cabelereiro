@@ -5,28 +5,65 @@ import { appointments } from '../../src/services/appointments.js';
 import { createButton } from '../../src/components/button.js';
 import { showToast } from '../../src/components/toast.js';
 
-async function fillProfessionals() {
-    const _config = await config.get();
+// #region LOCAL STATE
 
-    const select = document.getElementById('select-professional');
+let localServices = [];
+let localProfessionals = [];
 
-    select.innerHTML = '';
-    _config.profissionais.forEach(p => {
-        const option = document.createElement('option');
-        option.value = p.id;
-        option.textContent = p.nome;
-        select.appendChild(option);
+// #endregion LOCAL STATE
+
+// ------------------------------------------------------------------------------------------
+
+// #region RENDERS
+
+function fillServices() {
+    const $select = $('#select-service');
+    $select.empty();
+
+    localServices.forEach(s => {
+        $select.append(
+            $('<option>').val(s.id).text(`${s.nome} (${s.duracao} min)`)
+        );
+    });
+
+    filterProfessionalsByService();
+}
+
+function filterProfessionalsByService() {
+    const serviceId = $('#select-service').val();
+    const $select = $('#select-professional');
+
+    const filtered = localProfessionals.filter(p =>
+        p.servicosIds && p.servicosIds.includes(serviceId)
+    );
+
+    $select.empty();
+
+    if (!filtered.length) {
+        $select.append($('<option>').val('').text('No professionals available'));
+        return;
+    }
+
+    filtered.forEach(p => {
+        $select.append($('<option>').val(p.id).text(p.nome));
     });
 }
 
-async function confirmAppointment() {
-    const select = document.getElementById('select-professional');
-    const selected = select.options[select.selectedIndex];
+// #endregion RENDERS
 
+// ------------------------------------------------------------------------------------------
+
+// #region APPOINTMENTS
+
+async function confirmAppointment() {
     const payload = {
-        cliente: document.getElementById('client-name').value.trim(),
-        profissional: { id: select.value, nome: selected.textContent },
-        data: document.getElementById('appointment-datetime').value,
+        cliente: $('#client-name').val().trim(),
+        servicoId: $('#select-service').val(),
+        profissional: {
+            id: $('#select-professional').val(),
+            nome: $('#select-professional option:selected').text(),
+        },
+        data: $('#appointment-datetime').val(),
     };
 
     if (!payload.cliente || !payload.data) {
@@ -37,16 +74,34 @@ async function confirmAppointment() {
     try {
         await appointments.create(payload);
         showToast('Appointment confirmed!');
-        document.getElementById('client-name').value = '';
-        document.getElementById('appointment-datetime').value = '';
+        $('#client-name').val('');
+        $('#appointment-datetime').val('');
     } catch {
         showToast('Failed to schedule. Please try again.');
     }
 }
 
-function mountButton() {
-    const container = document.getElementById('btn-confirm-container');
-    container.appendChild(
+// #endregion APPOINTMENTS
+
+// ------------------------------------------------------------------------------------------
+
+// #region INIT
+
+async function loadConfig() {
+    const _config = await config.get();
+
+    localServices = _config.servicos ?? [];
+    localProfessionals = _config.profissionais ?? [];
+
+    fillServices();
+}
+
+export async function init() {
+    await loadConfig();
+
+    $('#select-service').on('change', filterProfessionalsByService);
+    
+    $('#btn-confirm-container').append(
         createButton({
             label: 'Confirm Appointment',
             variant: 'accent',
@@ -56,7 +111,4 @@ function mountButton() {
     );
 }
 
-export async function init() {
-    await fillProfessionals();
-    mountButton();
-}
+// #endregion INIT

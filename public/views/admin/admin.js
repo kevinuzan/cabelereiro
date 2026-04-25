@@ -7,37 +7,174 @@ import { createButton } from '../../src/components/button.js';
 import { showToast } from '../../src/components/toast.js';
 import { renderAppointmentList } from '../../src/components/appointments.js';
 // utils
-import { parseList } from '../../utils/string.js';
+import { readFileAsBase64 } from '../../utils/file.js';
+
+// #region LOCAL STATE
+
+let localProfessionals = [];
+let localServices = [];
+let servicePhotoBase64 = '';
+let profPhotoBase64 = '';
+
+let editingItem = null;
+let editingType = '';
+let editingPhotoTemp = '';
+
+// #endregion LOCAL STATE
+
+// ------------------------------------------------------------------------------------------
+
+// #region HELPERS
+
+/**
+ * Builds a .field wrapper with a label and an input element.
+ */
+function buildField(label, $input) {
+    return $('<div>')
+        .addClass('field')
+        .append(
+            $('<label>').addClass('field__label').text(label),
+            $input,
+        );
+}
+
+// #endregion HELPERS
+
+// ------------------------------------------------------------------------------------------
+
+// #region MODAL
+
+function openModal() {
+    $('#edit-modal').removeClass('hidden');
+}
+
+function closeModal() {
+    $('#edit-modal').addClass('hidden');
+    editingPhotoTemp = '';
+}
+
+// #endregion MODAL
+
+// ------------------------------------------------------------------------------------------
+
+// #region RENDERS
+
+function renderServicesList() {
+    const $container = $('#services-list');
+    if (!$container.length) return;
+    $container.empty();
+
+    localServices.forEach(s => {
+        $container.append(
+            $('<div>')
+                .addClass('admin-item')
+                .append(
+                    $('<img>')
+                        .addClass('admin-item__photo')
+                        .attr('src', s.foto),
+                    $('<span>')
+                        .addClass('admin-item__name')
+                        .text(`${s.nome} (${s.duracao} min)`),
+                    createButton({
+                        label: 'Edit',
+                        variant: 'ghost',
+                        onClick: () => openEditService(s.id),
+                    }),
+                    createButton({
+                        label: 'Remove',
+                        variant: 'danger',
+                        onClick: () => removeService(s.id),
+                    }),
+                )
+        );
+    });
+}
+
+function renderProfessionalsList() {
+    const $container = $('#professionals-list');
+    if (!$container.length) return;
+    $container.empty();
+
+    localProfessionals.forEach(p => {
+        $container.append(
+            $('<div>')
+                .addClass('admin-item')
+                .append(
+                    $('<img>')
+                        .addClass('admin-item__photo admin-item__photo--round')
+                        .attr('src', p.foto),
+                    $('<span>')
+                        .addClass('admin-item__name')
+                        .text(p.nome),
+                    createButton({
+                        label: 'Edit',
+                        variant: 'ghost',
+                        onClick: () => openEditProfessional(p.id),
+                    }),
+                    createButton({
+                        label: 'Remove',
+                        variant: 'danger',
+                        onClick: () => removeProfessional(p.id),
+                    }),
+                )
+        );
+    });
+}
+
+function renderServiceCheckboxes() {
+    const $container = $('#professional-services-checkboxes');
+    
+    if (!$container.length) return;
+    $container.empty().addClass('checkbox-grid');
+
+    if (!localServices.length) {
+        $container.append(
+            $('<p>').text('Add services first.').css('color', 'var(--text-muted)')
+        );
+        return;
+    }
+
+    localServices.forEach(s => {
+        $container.append(
+            $('<label>')
+                .addClass('checkbox-label')
+                .append(
+                    $('<input>').attr({ type: 'checkbox', value: s.id }).addClass('check-service'),
+                    $('<span>').addClass('service-chip').text(s.nome),
+                )
+        );
+    });
+}
+
+// #endregion RENDERS
+
+// ------------------------------------------------------------------------------------------
+
+// #region SETTINGS
 
 async function loadSettings() {
     const _config = await config.get();
-    document.getElementById('cut-duration').value = _config.tempoCorte;
-    document.getElementById('professionals-list').value = (_config.profissionais ?? []).join(', ');
-}
 
-async function loadAppointments() {
-    const element = document.getElementById('appointments-list');
-    const _appointments = await appointments.getAll();
-    renderAppointmentList(element, _appointments);
+    localProfessionals = _config.profissionais ?? [];
+    localServices = _config.servicos ?? [];
+
+    $('#cut-duration').val(_config.tempoCorte ?? 30);
+
+    renderServicesList();
+    renderProfessionalsList();
 }
 
 async function saveSettings() {
-    const duration = document.getElementById('cut-duration').value;
-    const professionals = document.getElementById('professionals-list').value;
-
     try {
-        await config.save(duration, parseList(professionals, {
-            transform: nome => ({ id: crypto.randomUUID(), nome })
-        }));
+        await config.save($('#cut-duration').val(), localProfessionals, localServices);
         showToast('Settings saved!');
     } catch {
         showToast('Failed to save settings.');
     }
 }
 
-function mountButton() {
-    const container = document.getElementById('btn-save-container');
-    container.appendChild(
+function initSettings() {
+    $('#btn-save-container').append(
         createButton({
             label: 'Save Settings',
             variant: 'primary',
@@ -47,17 +184,312 @@ function mountButton() {
     );
 }
 
-function listenToSocket() {
-    socket.on('novo_agendamento', (data) => {
-        showToast(`New appointment: ${data.cliente}`);
-        loadAppointments();
+// #endregion SETTINGS
+
+// ------------------------------------------------------------------------------------------
+
+// #region SERVICES
+
+function initServicePhotoUpload() {
+    $('#service-photo').on('change', function () {
+        readFileAsBase64(this.files[0], (base64) => {
+            servicePhotoBase64 = base64;
+            $('#service-photo-preview')
+                .empty()
+                .append($('<img>')
+                    .attr('src', base64)
+                    .css({ width: '70px', borderRadius: '8px', marginTop: '8px' })
+                );
+        });
     });
 }
 
-listenToSocket();
+function addService() {
+    const name = $('#service-name').val().trim();
+    const duration = $('#service-duration').val();
+
+    if (!name || !servicePhotoBase64) {
+        showToast('Please fill in the name and upload a photo.');
+        return;
+    }
+
+    localServices.push({
+        id: crypto.randomUUID(),
+        nome: name,
+        duracao: parseInt(duration),
+        foto: servicePhotoBase64,
+    });
+
+    $('#service-name').val('');
+    $('#service-duration').val('30');
+    $('#service-photo-preview').empty();
+    servicePhotoBase64 = '';
+
+    renderServicesList();
+}
+
+function removeService(id) {
+    localServices = localServices.filter(s => s.id !== id);
+    renderServicesList();
+}
+
+function initServices() {
+    initServicePhotoUpload();
+    $('#btn-add-service-container').append(
+        createButton({
+            label: 'Add Service',
+            variant: 'accent',
+            full: true,
+            onClick: addService,
+        })
+    );
+}
+
+// #endregion SERVICES
+
+// ------------------------------------------------------------------------------------------
+
+// #region TEAM
+
+function initProfessionalPhotoUpload() {
+    $('#professional-photo').on('change', function () {
+        readFileAsBase64(this.files[0], (base64) => {
+            profPhotoBase64 = base64;
+            $('#professional-photo-preview')
+                .empty()
+                .append($('<img>')
+                    .attr('src', base64)
+                    .css({
+                        width: '70px',
+                        borderRadius: '50%',
+                        marginTop: '8px',
+                    })
+                );
+        });
+    });
+}
+
+function addProfessional() {
+    const name = $('#professional-name').val().trim();
+    const serviceIds = $('.check-service:checked').map(
+        function () {
+            return this.value;
+        }).get();
+
+    if (!name) { showToast('Please enter a name.'); return; }
+    if (!profPhotoBase64) { showToast('Please upload a photo.'); return; }
+    if (!serviceIds.length) { showToast('Select at least one service.'); return; }
+
+    localProfessionals.push({
+        id: crypto.randomUUID(),
+        nome: name,
+        foto: profPhotoBase64,
+        servicosIds: serviceIds,
+    });
+
+    $('#professional-name').val('');
+    $('#professional-photo-preview').empty();
+    $('.check-service').prop('checked', false);
+    profPhotoBase64 = '';
+
+    renderProfessionalsList();
+}
+
+function removeProfessional(id) {
+    localProfessionals = localProfessionals.filter(p => p.id !== id);
+    renderProfessionalsList();
+}
+
+function initTeam() {
+    initProfessionalPhotoUpload();
+    $('#btn-add-professional-container').append(
+        createButton({
+            label: 'Add Professional',
+            variant: 'accent',
+            full: true,
+            onClick: addProfessional,
+        })
+    );
+}
+
+// #endregion TEAM
+
+// ------------------------------------------------------------------------------------------
+
+// #region APPOINTMENTS
+
+async function loadAppointments() {
+    const _appointments = await appointments.getAll();
+    renderAppointmentList($('#appointments-list')[0], _appointments);
+}
+
+// #endregion APPOINTMENTS
+
+// ------------------------------------------------------------------------------------------
+
+// #region MODAL EDIT
+
+function openEditService(id) {
+    editingItem = localServices.find(s => s.id === id);
+    editingType = 'service';
+    editingPhotoTemp = '';
+
+    $('#modal-title').text('Edit Service');
+    $('#modal-fields').empty().append(
+        buildField('Name', $('<input>')
+            .addClass('field__input')
+            .attr({ type: 'text', id: 'edit-name' })
+            .val(editingItem.nome)
+        ),
+        buildField('Duration (min)', $('<input>')
+            .addClass('field__input')
+            .attr({ type: 'number', id: 'edit-duration' })
+            .val(editingItem.duracao)
+        ),
+        buildField('Replace photo', $('<input>')
+            .addClass('field__input')
+            .attr({ type: 'file', id: 'edit-photo', accept: 'image/*' })
+        ),
+    );
+
+    $('#edit-photo').on('change', function () {
+        readFileAsBase64(this.files[0], (base64) => { editingPhotoTemp = base64; });
+    });
+
+    openModal();
+}
+
+function openEditProfessional(id) {
+    editingItem = localProfessionals.find(p => p.id === id);
+    editingType = 'professional';
+    editingPhotoTemp = '';
+
+    const $checkboxes = $('<div>').addClass('checkbox-grid');
+    localServices.forEach(s => {
+        $checkboxes.append(
+            $('<label>')
+                .addClass('checkbox-label')
+                .append(
+                    $('<input>')
+                        .attr({ type: 'checkbox', value: s.id })
+                        .addClass('edit-check-service')
+                        .prop('checked', editingItem.servicosIds?.includes(s.id) ?? false),
+                    $('<span>').addClass('service-chip').text(s.nome),
+                )
+        );
+    });
+
+    $('#modal-title').text('Edit Professional');
+    $('#modal-fields').empty().append(
+        buildField('Name', $('<input>')
+            .addClass('field__input')
+            .attr({ type: 'text', id: 'edit-name' })
+            .val(editingItem.nome)
+        ),
+        buildField('Services', $checkboxes),
+        buildField('Replace photo', $('<input>')
+            .addClass('field__input')
+            .attr({ type: 'file', id: 'edit-photo', accept: 'image/*' })
+        ),
+    );
+
+    $('#edit-photo').on('change', function () {
+        readFileAsBase64(this.files[0], (base64) => { editingPhotoTemp = base64; });
+    });
+
+    openModal();
+}
+
+function confirmEdit() {
+    const newName = $('#edit-name').val().trim();
+
+    if (editingType === 'service') {
+        editingItem.nome = newName;
+        editingItem.duracao = parseInt($('#edit-duration').val());
+        if (editingPhotoTemp) editingItem.foto = editingPhotoTemp;
+        renderServicesList();
+    } else {
+        editingItem.nome = newName;
+        editingItem.servicosIds = $('.edit-check-service:checked').map(
+            function () {
+                return this.value;
+            }).get();
+        if (editingPhotoTemp) editingItem.foto = editingPhotoTemp;
+        renderProfessionalsList();
+    }
+
+    closeModal();
+    showToast("Changes applied. Don't forget to save.");
+}
+
+function initModalButtons() {
+    $('#btn-modal-confirm-container').append(
+        createButton({
+            label: 'Confirm',
+            variant: 'accent',
+            full: true,
+            onClick: confirmEdit,
+        })
+    );
+    $('#btn-modal-cancel-container').append(
+        createButton({
+            label: 'Cancel',
+            variant: 'ghost',
+            full: true,
+            onClick: closeModal,
+        })
+    );
+    $('#modal-backdrop').on('click', closeModal);
+}
+
+// #endregion MODAL EDIT
+
+// ------------------------------------------------------------------------------------------
+
+// #region TABS
+
+function initSubTabs() {
+    $('.btn--sub-tab').on('click', function () {
+        const subtab = $(this).data('subtab');
+
+        $('.subview').addClass('hidden');
+        $('.btn--sub-tab').removeClass('active');
+        $(this).addClass('active');
+        $(`#subview-${subtab}`).removeClass('hidden');
+
+        if (subtab === 'team') renderServiceCheckboxes();
+    });
+}
+
+// #endregion TABS
+
+// ------------------------------------------------------------------------------------------
+
+// #region SOCKET
+
+function onNewAppointment(data) {
+    if (!$('#appointments-list').length) return;
+    showToast(`New appointment: ${data.cliente}`);
+    loadAppointments();
+}
+
+socket.on('novo_agendamento', onNewAppointment);
+
+export function cleanup() {
+    socket.off('novo_agendamento', onNewAppointment);
+}
+
+// #endregion SOCKET
+
+// ------------------------------------------------------------------------------------------
 
 export async function init() {
     await loadSettings();
     await loadAppointments();
-    mountButton();
+
+    initSubTabs();
+    initSettings();
+    initServices();
+    initTeam();
+    initModalButtons();
 }

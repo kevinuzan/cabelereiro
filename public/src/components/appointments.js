@@ -1,38 +1,24 @@
 import { formatDateTime } from '../../utils/date.js';
-import { createCx } from '../../utils/html.js';
 
-export function createAppointmentItem({ cliente, profissional, data }) {
-    const item = document.createElement('div');
-    item.className = 'appointment-item';
-    const cx = createCx(item.className);
-
-    const name = document.createElement('span');
-    name.className = cx.element('name');
-    name.textContent = cliente;
-
-    const detail = document.createElement('span');
-    detail.className = cx.element('detail');
-    detail.textContent = `${profissional.nome} - ${formatDateTime(data)}`;
-
-    item.appendChild(name);
-    item.appendChild(detail);
-
-    return item;
+function createAppointmentItem({ cliente, profissional, data }) {
+    return $('<div>')
+        .addClass('appointment-item')
+        .append(
+            $('<span>').addClass('appointment-item__name').text(cliente),
+            $('<span>').addClass('appointment-item__detail').text(`${profissional.nome} — ${formatDateTime(data)}`),
+        );
 }
 
 export function renderAppointmentList(container, appointments) {
-    container.innerHTML = '';
+    const $container = $(container);
+    $container.empty();
 
     if (!appointments.length) {
-        const p = document.createElement('p');
-        p.style.color = 'var(--text-muted)';
-        p.textContent = 'No appointments found.';
-        container.appendChild(p);
+        $container.append(
+            $('<p>').css('color', 'var(--text-muted)').text('No appointments found.')
+        );
         return;
     }
 
-    for (let i = 0; i < appointments.length; i++) {
-        const item = createAppointmentItem(appointments[i]);
-        container.appendChild(item);
-    }
+    appointments.forEach(a => $container.append(createAppointmentItem(a)));
 }

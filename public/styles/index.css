@@ -14,11 +14,13 @@ body {
     color: var(--text-primary);
     background: var(--bg-page);
     min-height: 100vh;
+    display: flex;
+    justify-content: center;
 }
 
 h2 {
     font-size: var(--font-size-xl);
-    font-weight: 600;
+    font-weight: 700;
 }
 
 h3 {
@@ -38,18 +40,28 @@ ul {
     list-style: none;
 }
 
+hr {
+    border: 0;
+    border-top: 1px solid var(--border-default);
+    margin: 30px 0;
+}
+
 .hidden {
     display: none !important;
 }
 
 /* #endregion BASE */
 
-/* #region COMPONENTS */
+/* --------------------------------------------------------------------------------------- */
+
+/* #region LAYOUT */
 
 .app-wrapper {
-    max-width: 640px;
+    width: 100%;
+    max-width: 1000px;
+    min-height: 100vh;
+    padding: var(--space-lg);
     margin: 0 auto;
-    padding: var(--space-lg) var(--space-md);
 }
 
 .tab-nav {
@@ -57,6 +69,18 @@ ul {
     gap: var(--space-sm);
     margin-bottom: var(--space-lg);
 }
+
+@media (max-width: 768px) {
+    .app-wrapper {
+        max-width: 480px;
+    }
+}
+
+/* #endregion LAYOUT */
+
+/* --------------------------------------------------------------------------------------- */
+
+/* #region CARD */
 
 .card {
     background: var(--bg-card);
@@ -67,14 +91,21 @@ ul {
     display: flex;
     flex-direction: column;
     gap: var(--space-md);
+    border: 1px solid var(--border-default);
 }
 
 .card__title {
     font-size: var(--font-size-xl);
-    font-weight: 600;
+    font-weight: 700;
     border-bottom: 2px solid var(--color-accent);
     padding-bottom: var(--space-sm);
 }
+
+/* #endregion CARD */
+
+/* --------------------------------------------------------------------------------------- */
+
+/* #region BUTTONS */
 
 .btn {
     display: inline-flex;
@@ -84,11 +115,11 @@ ul {
     padding: 10px var(--space-md);
     font-size: var(--font-size-base);
     font-family: var(--font-base);
-    font-weight: 500;
+    font-weight: 600;
     border: none;
     border-radius: var(--radius-md);
     cursor: pointer;
-    transition: background var(--transition-fast), transform var(--transition-fast);
+    transition: all var(--transition-base);
     box-shadow: var(--shadow-btn);
 }
 
@@ -103,11 +134,12 @@ ul {
 
 .btn--primary {
     background: var(--bg-btn-primary);
-    color: var(--text-on-dark);
+    color: var(--text-on-accent);
 }
 
 .btn--primary:hover:not(:disabled) {
-    background: var(--color-gray-700);
+    filter: brightness(1.1);
+    transform: translateY(-2px);
 }
 
 .btn--accent {
@@ -116,7 +148,8 @@ ul {
 }
 
 .btn--accent:hover:not(:disabled) {
-    background: var(--color-accent-dark);
+    filter: brightness(1.1);
+    transform: translateY(-2px);
 }
 
 .btn--ghost {
@@ -127,19 +160,49 @@ ul {
 }
 
 .btn--ghost:hover:not(:disabled) {
-    background: var(--color-gray-100);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    background: rgba(243, 143, 24, 0.05);
+}
+
+.btn--danger {
+    background: var(--color-danger);
+    color: var(--text-on-dark);
+    box-shadow: none;
+}
+
+.btn--danger:hover:not(:disabled) {
+    opacity: 0.85;
 }
 
 .btn--tab {
+    flex: 1;
+    background: var(--bg-input);
+    color: var(--text-secondary);
+    box-shadow: none;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    padding: var(--space-sm) var(--space-md);
+}
+
+.btn--tab.active {
+    background: var(--color-accent);
+    color: var(--text-on-accent);
+    border-color: var(--color-accent);
+    font-weight: 600;
+}
+
+.btn--sub-tab {
     background: transparent;
     color: var(--text-muted);
     box-shadow: none;
     border-bottom: 2px solid transparent;
     border-radius: 0;
-    padding: var(--space-sm) var(--space-md);
+    padding: var(--space-xs) var(--space-sm);
+    font-size: var(--font-size-sm);
 }
 
-.btn--tab.active {
+.btn--sub-tab.active {
     color: var(--text-primary);
     border-bottom-color: var(--color-accent);
     font-weight: 600;
@@ -148,6 +211,12 @@ ul {
 .btn--full {
     width: 100%;
 }
+
+/* #endregion BUTTONS */
+
+/* --------------------------------------------------------------------------------------- */
+
+/* #region FIELDS */
 
 .field {
     display: flex;
@@ -166,11 +235,11 @@ ul {
 .field__input,
 .field__select {
     width: 100%;
-    padding: 10px var(--space-sm);
+    padding: 14px;
     font-size: var(--font-size-base);
     font-family: var(--font-base);
     color: var(--text-primary);
-    background: var(--bg-card);
+    background: var(--bg-input);
     border: 1px solid var(--border-default);
     border-radius: var(--radius-md);
     transition: border-color var(--transition-fast);
@@ -182,30 +251,55 @@ ul {
     border-color: var(--border-focus);
 }
 
-.appointment-list {
+/* #endregion FIELDS */
+
+/* --------------------------------------------------------------------------------------- */
+
+/* #region CHECKBOX */
+
+.checkbox-label {
+    display: inline-flex;
+    cursor: pointer;
+}
+
+.checkbox-grid {
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
     gap: var(--space-sm);
+    padding: var(--space-xs) 0;
 }
 
-.appointment-item {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding: var(--space-sm) var(--space-md);
-    background: var(--color-gray-100);
-    border-left: 3px solid var(--color-accent);
-    border-radius: var(--radius-sm);
+.checkbox-grid input[type="checkbox"],
+.checkbox-label input[type="checkbox"] {
+    display: none;
 }
 
-.appointment-item__name {
-    font-weight: 600;
-}
-
-.appointment-item__detail {
+.checkbox-grid input[type="checkbox"] + span,
+.checkbox-label input[type="checkbox"] + span {
+    display: inline-block;
+    padding: 8px 16px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-default);
+    border-radius: 20px;
+    color: var(--text-secondary);
     font-size: var(--font-size-sm);
-    color: var(--text-muted);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
 }
+
+.checkbox-grid input[type="checkbox"]:checked + span,
+.checkbox-label input[type="checkbox"]:checked + span {
+    background: var(--color-accent);
+    color: var(--text-on-accent);
+    border-color: var(--color-accent);
+}
+
+/* #endregion CHECKBOX */
+
+/* --------------------------------------------------------------------------------------- */
+
+/* #region TOAST */
 
 @keyframes slideIn {
     from {
@@ -231,6 +325,123 @@ ul {
     box-shadow: var(--shadow-card);
     animation: slideIn var(--transition-base) forwards;
     z-index: 1000;
+    border: 1px solid var(--border-default);
 }
 
-/* #endregion COMPONENTS */
+/* #endregion TOAST */
+
+/* --------------------------------------------------------------------------------------- */
+
+/* #region MODAL */
+
+.modal {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal.hidden {
+    display: none !important;
+}
+
+.modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+}
+
+.modal__box {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 400px;
+    margin: var(--space-md);
+}
+
+.modal__actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    margin-top: var(--space-sm);
+}
+
+/* #endregion MODAL */
+
+/* --------------------------------------------------------------------------------------- */
+
+/* #region APPOINTMENTS */
+
+.appointment-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.appointment-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--space-sm) var(--space-md);
+    background: var(--bg-input);
+    border-left: 3px solid var(--color-accent);
+    border-radius: var(--radius-sm);
+}
+
+.appointment-item__name {
+    font-weight: 600;
+}
+
+.appointment-item__detail {
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+}
+
+/* #endregion APPOINTMENTS */
+
+/* --------------------------------------------------------------------------------------- */
+
+/* #region ADMIN */
+
+.sub-tab-nav {
+    display: flex;
+    gap: var(--space-xs);
+    flex-wrap: wrap;
+    background: var(--bg-input);
+    padding: 5px;
+    border-radius: var(--radius-md);
+}
+
+.admin-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--bg-input);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-sm);
+    border: 1px solid var(--border-default);
+}
+
+.admin-item__photo {
+    width: 50px;
+    height: 50px;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 2px solid var(--color-accent);
+}
+
+.admin-item__photo--round {
+    border-radius: 50%;
+}
+
+.admin-item__name {
+    flex: 1;
+    font-weight: 600;
+    font-size: var(--font-size-sm);
+}
+
+/* #endregion ADMIN */

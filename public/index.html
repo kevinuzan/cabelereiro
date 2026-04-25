@@ -19,6 +19,8 @@
 
     <!-- Must load before the module so io() is available globally -->
     <script src="/socket.io/socket.io.js"></script>
+    <!-- CDN: browser cannot resolve bare module specifiers, $ is exposed globally -->
+    <script src="/lib/jquery.min.js"></script>
     <script type="module" src="/src/app.js"></script>
 </body>
 

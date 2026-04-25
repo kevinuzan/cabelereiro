@@ -6,7 +6,5 @@ export function showToast(message, duration = 3000) {
 
     document.body.appendChild(toast);
 
-    setTimeout(() => {
-        toast.remove();
-    }, duration);
+    setTimeout(() => toast.remove(), duration);
 }
