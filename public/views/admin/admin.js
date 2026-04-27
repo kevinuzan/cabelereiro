@@ -51,7 +51,7 @@ function closeModal() {
 function initModalButtons(onConfirm) {
     $('#btn-modal-confirm-container').empty().append(
         createButton({
-            label: 'Confirm',
+            label: 'Confirmar',
             variant: 'accent',
             full: true,
             onClick: onConfirm,
@@ -59,7 +59,7 @@ function initModalButtons(onConfirm) {
     );
     $('#btn-modal-cancel-container').empty().append(
         createButton({
-            label: 'Cancel',
+            label: 'Cancelar',
             variant: 'ghost',
             full: true,
             onClick: closeModal,
@@ -99,7 +99,7 @@ async function saveSettings() {
 function initSettings() {
     $('#btn-save-container').append(
         createButton({
-            label: 'Save Settings',
+            label: 'Salvar configurações',
             variant: 'primary',
             full: true,
             onClick: saveSettings,
@@ -125,8 +125,8 @@ function renderServicesList() {
                 .append(
                     $('<img>').addClass('admin-item__photo').attr('src', s.foto),
                     $('<span>').addClass('admin-item__name').text(`${s.nome} (${s.duracao} min)`),
-                    createButton({ label: 'Edit', variant: 'ghost', onClick: () => openEditService(s.id) }),
-                    createButton({ label: 'Remove', variant: 'danger', onClick: () => removeService(s.id) }),
+                    createButton({ label: 'Editar', variant: 'ghost', onClick: () => openEditService(s.id) }),
+                    createButton({ label: 'Remover', variant: 'danger', onClick: () => removeService(s.id) }),
                 )
         );
     });
@@ -179,19 +179,19 @@ function openEditService(id) {
     editingItem = localServices.find(s => s.id === id);
     editingPhotoTemp = '';
 
-    $('#modal-title').text('Edit Service');
+    $('#modal-title').text('Editar Serviço');
     $('#modal-fields').empty().append(
-        buildField('Name', $('<input>')
+        buildField('Nome', $('<input>')
             .addClass('field__input')
             .attr({ type: 'text', id: 'edit-name' })
             .val(editingItem.nome)
         ),
-        buildField('Duration (min)', $('<input>')
+        buildField('Duração (min)', $('<input>')
             .addClass('field__input')
             .attr({ type: 'number', id: 'edit-duration' })
             .val(editingItem.duracao)
         ),
-        buildField('Replace photo', $('<input>')
+        buildField('Foto', $('<input>')
             .addClass('field__input')
             .attr({ type: 'file', id: 'edit-photo', accept: 'image/*' })
         ),
@@ -220,7 +220,7 @@ function initServices() {
     initServicePhotoUpload();
     $('#btn-add-service-container').append(
         createButton({
-            label: 'Add Service',
+            label: 'Adicionar Serviço',
             variant: 'accent',
             full: true,
             onClick: addService,
@@ -276,12 +276,12 @@ function renderProfessionalsList() {
                         .addClass('admin-item__name')
                         .text(p.nome),
                     createButton({
-                        label: 'Edit',
+                        label: 'Editar',
                         variant: 'ghost',
                         onClick: () => openEditProfessional(p.id),
                     }),
                     createButton({
-                        label: 'Remove',
+                        label: 'Remover',
                         variant: 'danger',
                         onClick: () => removeProfessional(p.id),
                     }),
@@ -358,15 +358,15 @@ function openEditProfessional(id) {
         );
     });
 
-    $('#modal-title').text('Edit Professional');
+    $('#modal-title').text('Editar Profissional');
     $('#modal-fields').empty().append(
-        buildField('Name', $('<input>')
+        buildField('Nome', $('<input>')
             .addClass('field__input')
             .attr({ type: 'text', id: 'edit-name' })
             .val(editingItem.nome)
         ),
-        buildField('Services', $checkboxes),
-        buildField('Replace photo', $('<input>')
+        buildField('Serviços', $checkboxes),
+        buildField('Foto', $('<input>')
             .addClass('field__input')
             .attr({ type: 'file', id: 'edit-photo', accept: 'image/*' })
         ),
@@ -399,7 +399,7 @@ function initTeam() {
     initProfessionalPhotoUpload();
     $('#btn-add-professional-container').append(
         createButton({
-            label: 'Add Professional',
+            label: 'Adicionar Profissional',
             variant: 'accent',
             full: true,
             onClick: addProfessional,

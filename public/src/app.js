@@ -5,13 +5,13 @@ import { init as initAdmin } from '../views/admin/admin.js';
 const routes = [
     {
         id: 'client',
-        label: 'Schedule',
+        label: 'Agendamento',
         partial: '../views/client/client.html',
         init: initCliente,
     },
     {
         id: 'admin',
-        label: 'Admin',
+        label: 'Administrador',
         partial: '../views/admin/admin.html',
         init: initAdmin,
     },

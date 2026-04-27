@@ -224,6 +224,10 @@ hr {
     gap: var(--space-xs);
 }
 
+.field:not(:first-child) {
+    margin-top: var(--space-md);
+}
+
 .field__label {
     font-size: var(--font-size-sm);
     font-weight: 600;

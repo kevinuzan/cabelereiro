@@ -42,7 +42,7 @@ function filterProfessionalsByService() {
     $select.empty();
 
     if (!filtered.length) {
-        $select.append($('<option>').val('').text('No professionals available'));
+        $select.append($('<option>').val('').text('Não há profissionais disponíveis'));
         return;
     }
 
@@ -88,7 +88,7 @@ function initAppointments() {
 
     $('#btn-confirm-container').append(
         createButton({
-            label: 'Confirm Appointment',
+            label: 'Confirme o agendamento',
             variant: 'accent',
             full: true,
             onClick: confirmAppointment,
