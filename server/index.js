@@ -11,8 +11,8 @@ import { Server } from 'socket.io';
 // internal
 import { notFoundHandler } from '../public/utils/http.js';
 import { connectDb } from './db.js';
-import { agendamentosRouter } from './routes/agendamentos.js';
-import { adminRouter } from './routes/configuracoes.js';
+import { appointmentsRouter } from './routes/appointments.js';
+import { configRouter } from './routes/config.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT;
@@ -27,14 +27,18 @@ async function bootstrap() {
     const io = new Server(httpServer);
 
     app.use(cors());
-    app.use(express.json());
+    // Adjust express limit for large images if needed.
+    app.use(express.json({ limit: '100mb' }));
     app.use(express.static(path.join(__dirname, '../public')));
 
-    app.use('/api/agendamentos', agendamentosRouter(io));
-    app.use('/api/admin', adminRouter());
+    app.use('/api/agendamentos', appointmentsRouter(io));
+    app.use('/api/admin', configRouter());
 
     app.use(notFoundHandler);
-    app.use((err, _req, res, _next) => res.status(500).json({ error: err.message }));
+    app.use((err, _req, res, _next) => {
+        console.error('[Server Error]', err.message);
+        res.status(500).json({ error: err.message });
+    });
 
     const env = process.env.NODE_ENV;
 

@@ -1,12 +1,12 @@
 import { createButton } from '../src/components/button.js';
-import { init as initCliente } from '../views/cliente/cliente.js';
+import { init as initCliente } from '../views/client/client.js';
 import { init as initAdmin } from '../views/admin/admin.js';
 
 const routes = [
     {
         id: 'client',
         label: 'Schedule',
-        partial: '../views/cliente/cliente.html',
+        partial: '../views/client/client.html',
         init: initCliente,
     },
     {
@@ -18,33 +18,38 @@ const routes = [
 ];
 
 let currentRoute = null;
+let cancellationToken = null;
 
-// Avaliar possibilidade de adicionar CancellationTokens ao alterar abas
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 async function navigateTo(routeId) {
     const route = routes.find(r => r.id === routeId);
     if (!route || route === currentRoute) return;
     currentRoute = route;
 
-    document.querySelectorAll('.btn--tab').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.route === routeId);
+    if (cancellationToken) cancellationToken.cancelled = true;
+    const navigationToken = { cancelled: false };
+    cancellationToken = navigationToken;
+
+    $('.btn--tab').each(function () {
+        $(this).toggleClass('active', $(this).data('route') === routeId);
     });
 
-    const root = document.getElementById('app-root');
-    const label = document.createElement('p');
-    label.style.color = 'var(--text-muted)';
-    label.style.padding = 'var(--space-md)';
-    label.textContent = 'Loading...';
-    root.appendChild(label);
+    const $root = $('#app-root');
+    const $label = $('<p>')
+        .css({color: 'var(--text-muted)', padding: 'var(--space-md)' })
+        .text('Loading...');
+    $root.append($label);
 
     try {
         const res = await fetch(route.partial);
         const html = await res.text();
-        root.innerHTML = html;
-        await route.init();
+
+        if (navigationToken.cancelled) return;
+
+        $root.html(html);
+        await route.init(navigationToken);
     } catch (err) {
-        label.style = "color:var(--color-danger)";
-        label.textContent = "Failed to load page.";
+        if (navigationToken.cancelled) return;
+        $label.css('color', 'var(--color-danger)').text('Failed to load page.');
         console.error('Failed to load partial:', err);
     }
 }

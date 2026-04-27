@@ -28,5 +28,8 @@
   },
   "devDependencies": {
     "dotenv-cli": "^11.0.0"
-  }
+  },
+  "editor.foldingStrategy": "auto",
+  "editor.folding": true,
+  "editor.showFoldingControls": "always"
 }

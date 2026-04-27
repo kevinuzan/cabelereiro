@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { getDb } from '../db.js';
 import { asyncHandler } from '../../public/utils/http.js';
 
-export function agendamentosRouter(io) {
+export function appointmentsRouter(io) {
     const router = Router();
     const coll = () => getDb().collection('agendamentos');
 

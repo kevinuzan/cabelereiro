@@ -5,16 +5,12 @@ import { appointments } from '../../src/services/appointments.js';
 import { createButton } from '../../src/components/button.js';
 import { showToast } from '../../src/components/toast.js';
 
-// #region LOCAL STATE
-
 let localServices = [];
 let localProfessionals = [];
 
-// #endregion LOCAL STATE
-
 // ------------------------------------------------------------------------------------------
 
-// #region RENDERS
+// #region SERVICES
 
 function fillServices() {
     const $select = $('#select-service');
@@ -28,6 +24,12 @@ function fillServices() {
 
     filterProfessionalsByService();
 }
+
+// #endregion SERVICES
+
+// ------------------------------------------------------------------------------------------
+
+// #region TEAM
 
 function filterProfessionalsByService() {
     const serviceId = $('#select-service').val();
@@ -49,7 +51,7 @@ function filterProfessionalsByService() {
     });
 }
 
-// #endregion RENDERS
+// #endregion TEAM
 
 // ------------------------------------------------------------------------------------------
 
@@ -81,26 +83,9 @@ async function confirmAppointment() {
     }
 }
 
-// #endregion APPOINTMENTS
-
-// ------------------------------------------------------------------------------------------
-
-// #region INIT
-
-async function loadConfig() {
-    const _config = await config.get();
-
-    localServices = _config.servicos ?? [];
-    localProfessionals = _config.profissionais ?? [];
-
-    fillServices();
-}
-
-export async function init() {
-    await loadConfig();
-
+function initAppointments() {
     $('#select-service').on('change', filterProfessionalsByService);
-    
+
     $('#btn-confirm-container').append(
         createButton({
             label: 'Confirm Appointment',
@@ -111,4 +96,30 @@ export async function init() {
     );
 }
 
-// #endregion INIT
+// #endregion APPOINTMENTS
+
+// ------------------------------------------------------------------------------------------
+
+// #region SETTINGS
+
+async function loadConfig() {
+    const _config = await config.get();
+
+    localServices = _config.servicos ?? [];
+    localProfessionals = _config.profissionais ?? [];
+
+    fillServices();
+}
+
+// #endregion SETTINGS
+
+// ------------------------------------------------------------------------------------------
+
+export async function init(cancellationToken) {
+    const stop = () => cancellationToken.cancelled;
+
+    await loadConfig();
+    if (stop()) return;
+
+    initAppointments();
+}
