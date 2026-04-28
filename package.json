@@ -1,12 +1,12 @@
 {
   "name": "http-nodejs",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "server.js",
   "author": "Aiden Bai",
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "start": "node server/index.js",
+    "start": "node server/server.js",
     "sync:env": "railway variable list -k > .env"
   },
   "dependencies": {
