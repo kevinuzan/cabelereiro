@@ -74,26 +74,19 @@ function initModalButtons(onConfirm) {
 
 // #region SETTINGS
 
-async function loadSettings() {
-    const _config = await config.get();
-
-    localProfessionals = _config.profissionais ?? [];
-    localServices = _config.servicos ?? [];
-
-    $('#cut-duration').val(_config.tempoCorte ?? 30);
+function loadSettings() {
+    return config.get().then((_config) => {
+        localProfessionals = _config.profissionais ?? [];
+        localServices = _config.servicos ?? [];
+        $('#cut-duration').val(_config.tempoCorte ?? 30);
+    });
 }
 
-async function saveSettings() {
-    try {
-        await config.save(
-            $('#cut-duration').val(),
-            localProfessionals,
-            localServices,
-        );
-        showToast('Settings saved!');
-    } catch {
-        showToast('Failed to save settings.');
-    }
+function saveSettings() {
+    return config
+        .save($('#cut-duration').val(), localProfessionals, localServices)
+        .then(() => showToast('Settings saved!'))
+        .catch(() => showToast('Failed to save settings.'));
 }
 
 function initSettings() {
@@ -413,9 +406,10 @@ function initTeam() {
 
 // #region APPOINTMENTS
 
-async function loadAppointments() {
-    const _appointments = await appointments.getAll();
-    renderAppointmentList($('#appointments-list')[0], _appointments);
+function loadAppointments() {
+    return appointments.getAll().then((_appointments) => {
+        renderAppointmentList($('#appointments-list')[0], _appointments);
+    });
 }
 
 // #endregion APPOINTMENTS
@@ -457,13 +451,13 @@ export function cleanup() {
 
 // ------------------------------------------------------------------------------------------
 
-export async function init(cancellationToken) {
+export function init(cancellationToken) {
     const stop = () => cancellationToken.cancelled;
 
-    await loadSettings();
+    loadSettings();
     if (stop()) return;
 
-    await loadAppointments();
+    loadAppointments();
     if (stop()) return;
 
     initSubTabs();

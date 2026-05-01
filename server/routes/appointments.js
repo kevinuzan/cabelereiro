@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import { getDb } from '../db.js';
-import { asyncHandler } from '../../public/utils/http.js';
 
 export function appointmentsRouter(io) {
     const router = Router();
@@ -8,9 +7,10 @@ export function appointmentsRouter(io) {
 
     // #region GET
 
-    router.get('/', asyncHandler(async (_req, res) => {
-        res.json(await coll().find().sort({ data: 1 }).toArray());
-    }));
+    router.get('/', (_req, res, next) => coll()
+        .find().sort({ data: 1 }).toArray()
+        .then(data => res.json(data)).catch(next)
+    );
 
     // #endregion GET
 
@@ -18,14 +18,16 @@ export function appointmentsRouter(io) {
 
     // #region ADD/MODIFY
 
-    router.post('/', asyncHandler(async (req, res) => {
+    router.post('/', (req, res, next) => {
         const newObj = { ...req.body, dataCriacao: new Date() };
-        const result = await coll().insertOne(newObj);
-        const created = { ...newObj, _id: result.insertedId };
 
-        io.emit('novo_agendamento', created);
-        res.status(201).json({ success: true, data: created });
-    }));
+        coll().insertOne(newObj).then((result) => {
+            const created = { ...newObj, _id: result.insertedId };
+
+            io.emit('novo_agendamento', created);
+            res.status(201).json({ success: true, data: created });
+        }).catch(next);
+    });
 
     // #endregion ADD/MODIFY
 

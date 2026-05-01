@@ -1,8 +1,15 @@
 import { createButton } from '../src/components/button.js';
 import { init as initCliente } from '../views/client/client.js';
 import { init as initAdmin } from '../views/admin/admin.js';
+import { init as initAuth } from '../views/auth/auth.js';
 
 const routes = [
+    {
+        id: 'auth',
+        label: 'Autenticação',
+        partial: '../views/auth/auth.html',
+        init: initAuth,
+    },
     {
         id: 'client',
         label: 'Agendamento',
@@ -20,7 +27,7 @@ const routes = [
 let currentRoute = null;
 let cancellationToken = null;
 
-async function navigateTo(routeId) {
+function navigateTo(routeId) {
     const route = routes.find(r => r.id === routeId);
     if (!route || route === currentRoute) return;
     currentRoute = route;
@@ -35,23 +42,23 @@ async function navigateTo(routeId) {
 
     const $root = $('#app-root');
     const $label = $('<p>')
-        .css({color: 'var(--text-muted)', padding: 'var(--space-md)' })
+        .css({ color: 'var(--text-muted)', padding: 'var(--space-md)' })
         .text('Loading...');
+
     $root.append($label);
 
-    try {
-        const res = await fetch(route.partial);
-        const html = await res.text();
-
-        if (navigationToken.cancelled) return;
-
-        $root.html(html);
-        await route.init(navigationToken);
-    } catch (err) {
-        if (navigationToken.cancelled) return;
-        $label.css('color', 'var(--color-danger)').text('Failed to load page.');
-        console.error('Failed to load partial:', err);
-    }
+    return fetch(route.partial)
+        .then(res => res.text())
+        .then(html => {
+            if (navigationToken.cancelled) return;
+            $root.html(html);
+            return route.init(navigationToken);
+        })
+        .catch(err => {
+            if (navigationToken.cancelled) return;
+            $label.css('color', 'var(--color-danger)').text('Failed to load page.');
+            console.error('Failed to load partial:', err);
+        });
 }
 
 function buildNav() {
@@ -68,4 +75,4 @@ function buildNav() {
 }
 
 buildNav();
-navigateTo('client');
+navigateTo('auth');

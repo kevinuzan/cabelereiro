@@ -2,56 +2,50 @@
 import 'dotenv/config';
 // node
 import { createServer } from 'http';
-import path from 'path';
 import { fileURLToPath } from 'url';
+import path from 'path';
 // external
 import express from 'express';
 import cors from 'cors';
 import { Server } from 'socket.io';
 // internal
-import { notFoundHandler } from '../public/utils/http.js';
 import { connectDb } from './db.js';
+import { authRouter } from './routes/auth.js';
 import { appointmentsRouter } from './routes/appointments.js';
 import { configRouter } from './routes/config.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const PORT = process.env.PORT;
 
-if (!PORT) throw new Error('Environment variable PORT is not defined.');
+const MONGO_PUBLIC_URL = process.env.MONGO_PUBLIC_URL;
+const PORT = process.env.PORT || 3000;
+const JWT_SECRET = process.env.JWT_SECRET;
 
-async function bootstrap() {
-    await connectDb();
+function bootstrap() {
+    return connectDb(MONGO_PUBLIC_URL, "barbearia_db").then(() => {
+        const app = express();
+        const httpServer = createServer(app);
+        const io = new Server(httpServer);
 
-    const app = express();
-    const httpServer = createServer(app);
-    const io = new Server(httpServer);
+        app.use(cors());
+        app.use(express.json({ limit: '50mb' }));
+        app.use(express.static(path.join(__dirname, '../public')));
 
-    app.use(cors());
-    // Adjust express limit for large images if needed.
-    app.use(express.json({ limit: '100mb' }));
-    app.use(express.static(path.join(__dirname, '../public')));
+        app.use('/api/auth', authRouter(JWT_SECRET));
+        app.use('/api/agendamentos', appointmentsRouter(io));
+        app.use('/api/admin', configRouter());
 
-    app.use('/api/agendamentos', appointmentsRouter(io));
-    app.use('/api/admin', configRouter());
+        app.use((req, res) =>
+            res.status(404).json({ success: false, message: 'Route not found' })
+        );
 
-    app.use(notFoundHandler);
-    app.use((err, _req, res, _next) => {
-        console.error('[Server Error]', err.message);
-        res.status(500).json({ error: err.message });
-    });
+        app.use((err, _req, res, _next) =>
+            res.status(500).json({ success: false, message: 'Internal server error' })
+        );
 
-    const env = process.env.NODE_ENV;
-
-    httpServer.listen(PORT, () => {
-        if (env === 'development') {
-            console.log(`Server running at http://localhost:${PORT}`);
-        } else {
-            console.log(`Server running on port ${PORT} [${env}]`);
-        }
+        httpServer.listen(PORT, '0.0.0.0', () =>
+            console.log(`Server running on port ${PORT}`)
+        );
     });
 }
 
-bootstrap().catch(err => {
-    console.error('Failed to start server:', err);
-    process.exit(1);
-});
+bootstrap().catch(err => process.exit(1));

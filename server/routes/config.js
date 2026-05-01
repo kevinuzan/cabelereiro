@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import { getDb } from '../db.js';
-import { asyncHandler } from '../../public/utils/http.js';
 
 export function configRouter() {
     const router = Router();
@@ -8,10 +7,11 @@ export function configRouter() {
 
     // #region GET
 
-    router.get('/config', asyncHandler(async (_req, res) => {
-        const config = await coll().findOne({ tipo: 'geral' });
-        res.json(config || { tempoCorte: 30, profissionais: [] });
-    }));
+    router.get('/config', (_req, res, next) => coll()
+        .findOne({ tipo: 'geral' })
+        .then(config => res.json(config || { tempoCorte: 30, profissionais: [] }))
+        .catch(next)
+    );
 
     // #endregion GET
 
@@ -19,15 +19,17 @@ export function configRouter() {
 
     // #region ADD/MODIFY
 
-    router.post('/config', asyncHandler(async (req, res) => {
+    router.post('/config', (req, res, next) => {
         const { tempoCorte, profissionais } = req.body;
-        await coll().updateOne(
+
+        coll().updateOne(
             { tipo: 'geral' },
             { $set: { tempoCorte, profissionais } },
             { upsert: true }
-        );
-        res.json({ success: true });
-    }));
+        )
+        .then(() => res.json({ success: true }))
+        .catch(next);
+    });
 
     // #endregion ADD/MODIFY
 

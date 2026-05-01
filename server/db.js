@@ -1,18 +1,18 @@
-import { MongoClient } from 'mongodb';
-
-const URI = process.env.MONGO_URL;
-const DB_NAME = process.env.MONGO_DB_NAME;
+import { MongoClient, ObjectId } from 'mongodb';
 
 let _db = null;
 
-export async function connectDb() {
-    const client = new MongoClient(URI);
-    await client.connect();
-    _db = client.db(DB_NAME);
-    console.log('MongoDB connected');
+export function connectDb(url, db) {
+    const client = new MongoClient(url);
+    return client.connect().then(() => {
+        _db = client.db(db);
+        console.log('MongoDB connected');
+    });
 }
 
 export function getDb() {
     if (!_db) throw new Error('MongoDB not initialized');
     return _db;
 }
+
+export { ObjectId };

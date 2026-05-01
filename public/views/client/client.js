@@ -57,7 +57,7 @@ function filterProfessionalsByService() {
 
 // #region APPOINTMENTS
 
-async function confirmAppointment() {
+function confirmAppointment() {
     const payload = {
         cliente: $('#client-name').val().trim(),
         servicoId: $('#select-service').val(),
@@ -73,14 +73,13 @@ async function confirmAppointment() {
         return;
     }
 
-    try {
-        await appointments.create(payload);
-        showToast('Appointment confirmed!');
-        $('#client-name').val('');
-        $('#appointment-datetime').val('');
-    } catch {
-        showToast('Failed to schedule. Please try again.');
-    }
+    appointments.create(payload)
+        .then(() => {
+            showToast('Appointment confirmed!');
+            $('#client-name').val('');
+            $('#appointment-datetime').val('');
+        })
+        .catch(() => showToast('Failed to schedule. Please try again.'));
 }
 
 function initAppointments() {
@@ -102,23 +101,22 @@ function initAppointments() {
 
 // #region SETTINGS
 
-async function loadConfig() {
-    const _config = await config.get();
-
-    localServices = _config.servicos ?? [];
-    localProfessionals = _config.profissionais ?? [];
-
-    fillServices();
+function loadConfig() {
+    return config.get().then((_config) => {
+        localServices = _config.servicos ?? [];
+        localProfessionals = _config.profissionais ?? [];
+        fillServices();
+    });
 }
 
 // #endregion SETTINGS
 
 // ------------------------------------------------------------------------------------------
 
-export async function init(cancellationToken) {
+export function init(cancellationToken) {
     const stop = () => cancellationToken.cancelled;
 
-    await loadConfig();
+    loadConfig();
     if (stop()) return;
 
     initAppointments();

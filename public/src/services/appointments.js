@@ -1,9 +1,8 @@
-import { methods, request } from '../../utils/http.js'
-
 export const appointments = {
-    getAll: () => request('/api/agendamentos'),
-    create: (data) => request('/api/agendamentos', {
-        method: methods.post,
+    getAll: () => fetch('/api/agendamentos'),
+    create: (data) => fetch('/api/agendamentos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
     }),
 };
